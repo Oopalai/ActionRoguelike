@@ -33,8 +33,14 @@ void ASBCharacter::Move(const FInputActionValue& Value)
 
 	if (Controller)
 	{
-		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
-		AddMovementInput(GetActorRightVector(), MovementVector.X);
+		FRotator ControlRotation = GetControlRotation();
+		ControlRotation.Roll = 0;
+		ControlRotation.Pitch = 0;
+		
+		AddMovementInput(ControlRotation.Vector(), MovementVector.X);
+
+		//The right movement uses the Rotation Matrix to get the vector pointing right using the GetScaledAxis on the Y. 
+		AddMovementInput(FRotationMatrix(ControlRotation).GetScaledAxis(EAxis::Y), MovementVector.Y);
 	}
 }
 
