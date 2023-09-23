@@ -36,24 +36,33 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	/** The rotate action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
+	
 	/** The jump action.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
+
+	/** The primary attack action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PrimaryAttackAction;
 	
+protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;
+
 public:
 	// Sets default values for this character's properties
 	ASBCharacter();
 
 protected:
-
 	/** Moves the character. Called by the MoveAction function.*/
 	void Move(const FInputActionValue& Value);
 
 	/** Makes the character look around. Called by the LookAction function.*/
 	void Look(const FInputActionValue& Value);
+
+	/** Performs the primary attack action of the character. */
+	void PrimaryAttack();
 	
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

@@ -89,14 +89,26 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASBCharacter::Move);
-
+		
 		//Jumping
 		//TODO: Implement Jumping.
+
+		//Attacking
+		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryAttack);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component. This character is not set up to use legacy inputs."), *GetNameSafe(this));
 	}
-	
 }
 
+void ASBCharacter::PrimaryAttack()
+{
+	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
+	const FTransform SpawnT = FTransform(GetControlRotation(), HandLoc);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams);
+}
