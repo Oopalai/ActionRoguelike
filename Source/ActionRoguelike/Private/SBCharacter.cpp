@@ -55,6 +55,11 @@ void ASBCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ASBCharacter::Jump()
+{
+	Super::Jump();
+}
+
 // Called when the game starts or when spawned
 void ASBCharacter::BeginPlay()
 {
@@ -91,7 +96,7 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASBCharacter::Move);
 		
 		//Jumping
-		//TODO: Implement Jumping.
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASBCharacter::Jump);
 
 		//Attacking
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryAttack);

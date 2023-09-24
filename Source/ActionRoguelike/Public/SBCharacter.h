@@ -60,6 +60,9 @@ protected:
 	/** Makes the character look around. Called by the LookAction function.*/
 	void Look(const FInputActionValue& Value);
 
+	/** Makes the character jump, called by the Jump Action.*/
+	virtual void Jump() override;
+	
 	/** Performs the primary attack action of the character. */
 	void PrimaryAttack();
 	
@@ -71,5 +74,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 };
