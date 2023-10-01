@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SBCharacter.generated.h"
 
+class USBInteractionComponent;
 struct FInputActionValue;
 class UCameraComponent;
 class USpringArmComponent;
@@ -25,6 +26,9 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(VisibleAnywhere, Category = Interaction)
+	USBInteractionComponent* InteractionComp;
+	
 	/** The default input mapping context for the character.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -40,7 +44,10 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	/** The jump action.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PrimaryInteractAction;
+	
 	/** The primary attack action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PrimaryAttackAction;
@@ -65,6 +72,8 @@ protected:
 	
 	/** Performs the primary attack action of the character. */
 	void PrimaryAttack();
+
+	void PrimaryInteract();
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

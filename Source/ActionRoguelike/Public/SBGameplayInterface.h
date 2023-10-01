@@ -13,13 +13,16 @@ class USBGameplayInterface : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class ACTIONROGUELIKE_API ISBGameplayInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	/**
+	 * Makes an Interact_Implementation available to classes that use this interface.
+	 * @param InstigatorPawn The pawn that interacts with the object.
+	 */
+	UFUNCTION(BlueprintNativeEvent)
+	void Interact(APawn* InstigatorPawn);
 };

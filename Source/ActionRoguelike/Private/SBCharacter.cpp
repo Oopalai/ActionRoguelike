@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "SBInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -22,6 +23,8 @@ ASBCharacter::ASBCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	InteractionComp = CreateDefaultSubobject<USBInteractionComponent>("InteractionComp");
+	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 	bUseControllerRotationYaw = false;
@@ -100,6 +103,9 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 		//Attacking
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryAttack);
+
+		//Primary Interaction
+		EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryInteract);
 	}
 	else
 	{
@@ -116,4 +122,13 @@ void ASBCharacter::PrimaryAttack()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams);
+}
+
+void ASBCharacter::PrimaryInteract()
+{
+	//Potential Optimization - Not necessary.
+	if (InteractionComp)
+	{
+		InteractionComp->PrimaryInteract();	
+	}
 }
