@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SBCharacter.generated.h"
 
+class USBInteractionComponent;
 struct FInputActionValue;
 class UCameraComponent;
 class USpringArmComponent;
@@ -24,7 +25,11 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	/** Camera component added in Lecture 2.3. Used by the SpringArmComp.*/
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* CameraComp;
+	
+	UPROPERTY(VisibleAnywhere, Category = Interaction)
+	USBInteractionComponent* InteractionComp;
 
+#pragma region "Input/Output Actions"
 	/** The default input mapping context for the character.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -40,15 +45,28 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	/** The jump action.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PrimaryInteractAction;
+	
 	/** The primary attack action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PrimaryAttackAction;
+
+#pragma endregion
 	
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Attack)
 	TSubclassOf<AActor> ProjectileClass;
 
+	UPROPERTY(EditAnywhere, Category = Attack)
+	UAnimMontage* AttackAnimation;
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	float FAttackDelay;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
+	
 public:
 	// Sets default values for this character's properties
 	ASBCharacter();
@@ -65,6 +83,10 @@ protected:
 	
 	/** Performs the primary attack action of the character. */
 	void PrimaryAttack();
+
+	void PrimaryAttack_TimeElapse();
+	
+	void PrimaryInteract();
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

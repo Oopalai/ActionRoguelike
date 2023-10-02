@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "SBInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -22,9 +23,12 @@ ASBCharacter::ASBCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	InteractionComp = CreateDefaultSubobject<USBInteractionComponent>("InteractionComp");
+	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 	bUseControllerRotationYaw = false;
+	FAttackDelay = 0.2f;
 }
 
 void ASBCharacter::Move(const FInputActionValue& Value)
@@ -91,15 +95,14 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	{
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASBCharacter::Look);
-		
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASBCharacter::Move);
-		
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASBCharacter::Jump);
-
 		//Attacking
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryAttack);
+		//Primary Interaction
+		EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryInteract);
 	}
 	else
 	{
@@ -109,6 +112,15 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ASBCharacter::PrimaryAttack()
 {
+	//Play the attack animation.
+	PlayAnimMontage(AttackAnimation);
+
+	//HACK: This should be redone to use Animation Notifiers once we learn about them. 
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASBCharacter::PrimaryAttack_TimeElapse, FAttackDelay);
+}
+
+void ASBCharacter::PrimaryAttack_TimeElapse()
+{
 	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
 	const FTransform SpawnT = FTransform(GetControlRotation(), HandLoc);
 
@@ -116,4 +128,13 @@ void ASBCharacter::PrimaryAttack()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams);
+}
+
+void ASBCharacter::PrimaryInteract()
+{
+	//The 'If' check here is not particularly necessary and could be optimized out. 
+	if (InteractionComp)
+	{
+		InteractionComp->PrimaryInteract();	
+	}
 }
