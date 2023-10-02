@@ -16,7 +16,7 @@ public:
 	// Sets default values for this component's properties
 	USBInteractionComponent();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Debug)
 	bool DebugVisualization;
 	
 protected:
