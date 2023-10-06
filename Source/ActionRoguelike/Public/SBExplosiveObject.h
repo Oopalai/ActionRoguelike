@@ -33,4 +33,7 @@ public:
 
 	UFUNCTION()
 	void ExplodeOnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintCallable)
+	void Explode() const;
 };
