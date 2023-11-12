@@ -13,6 +13,7 @@ void ASBExplosiveObject::ExplodeOnHit(UPrimitiveComponent* HitComponent, AActor*
 
 void ASBExplosiveObject::Explode() const
 {
+	UE_LOG(LogTemp, Log, TEXT("%s was hit at %f and exploded."), *GetNameSafe(this), GetWorld()->GetTimeSeconds())
 	RadialForceComponent->FireImpulse();
 }
 
@@ -28,6 +29,13 @@ ASBExplosiveObject::ASBExplosiveObject()
 
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForceComp");
 	RadialForceComponent->SetupAttachment(RootComponent);
+
+	RadialForceComponent->SetAutoActivate(false);
+	RadialForceComponent->Radius = 10.0f;
+	RadialForceComponent->ForceStrength = 1.0f;
+	RadialForceComponent->ImpulseStrength = 1.0f;
+	RadialForceComponent->bImpulseVelChange = true;
+	
 }
 
 // Called when the game starts or when spawned
