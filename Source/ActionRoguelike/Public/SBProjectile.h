@@ -3,29 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SBProjectile.h"
 #include "GameFramework/Actor.h"
-#include "SBMagicProjectile.generated.h"
+#include "SBProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
-class UParticleSystemComponent;
+class UParticleSystem;
 
-UCLASS()
-class ACTIONROGUELIKE_API ASBMagicProjectile : public ASBProjectile
+UCLASS(Abstract)
+class ACTIONROGUELIKE_API ASBProjectile : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ASBMagicProjectile();
+	ASBProjectile();
 
 protected:
-	//The effect that gets played by the magical projectile.
+	//The sphere component is the collision component for the projectile.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UParticleSystemComponent* EffectComp;
+	USphereComponent* SphereComp;
+
+	//The movement component is responsible for making the sphere component move.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UProjectileMovementComponent* MovementComp;
 	
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
