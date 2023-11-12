@@ -2,6 +2,7 @@
 
 #include "SBCharacter.h"
 
+#include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
@@ -122,7 +123,11 @@ void ASBCharacter::PrimaryAttack()
 void ASBCharacter::PrimaryAttack_TimeElapse()
 {
 	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
-	const FTransform SpawnT = FTransform(GetControlRotation(), HandLoc);
+	FHitResult HitR;
+	GetWorld()->LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector()*1250, "Projectile");
+	FRotator ProjRotation =	UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
+	
+	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
