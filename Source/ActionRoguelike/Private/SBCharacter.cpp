@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SBInteractionComponent.h"
+#include "SBAttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -25,6 +26,7 @@ ASBCharacter::ASBCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<USBInteractionComponent>("InteractionComp");
+	AttributeComp = CreateDefaultSubobject<USBAttributeComponent>("AttributeComp");
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
@@ -100,8 +102,10 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASBCharacter::Move);
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASBCharacter::Jump);
-		//Attacking
+		//Primary Attack
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryAttack);
+		//Secondary Attack
+		EnhancedInputComponent->BindAction(SecondaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::SecondaryAttack);
 		//Primary Interaction
 		EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryInteract);
 	}
@@ -133,7 +137,30 @@ void ASBCharacter::PrimaryAttack_TimeElapse()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams);
+	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams));
+}
+
+void ASBCharacter::SecondaryAttack()
+{
+	PlayAnimMontage(AttackAnimation);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_SecondaryAttack, this, &ASBCharacter::SecondaryAttack_TimeElapse, FAttackDelay);
+}
+
+void ASBCharacter::SecondaryAttack_TimeElapse()
+{
+	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
+	FHitResult HitR;
+	GetWorld() -> LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector()*1250, "Projectile");
+	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
+
+	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+
+	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(SecondaryProjectileClass, SpawnT, SpawnParams));
 }
 
 void ASBCharacter::PrimaryInteract()
