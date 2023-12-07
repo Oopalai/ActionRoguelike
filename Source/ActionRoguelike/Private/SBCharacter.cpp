@@ -108,6 +108,8 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SecondaryAttackAction, ETriggerEvent::Triggered, this, &ASBCharacter::SecondaryAttack);
 		//Primary Interaction
 		EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Triggered, this, &ASBCharacter::PrimaryInteract);
+		//Teleport
+		EnhancedInputComponent->BindAction(TeleportAction, ETriggerEvent::Triggered, this, &ASBCharacter::Teleport);
 	}
 	else
 	{
@@ -161,6 +163,31 @@ void ASBCharacter::SecondaryAttack_TimeElapse()
 	SpawnParams.Instigator = this;
 
 	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(SecondaryProjectileClass, SpawnT, SpawnParams));
+}
+
+void ASBCharacter::Teleport()
+{
+	PlayAnimMontage(AttackAnimation);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_Teleport, this, &ASBCharacter::Teleport_TimeElapsed, FAttackDelay);
+}
+
+void ASBCharacter::Teleport_TimeElapsed()
+{
+	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
+	FHitResult HitR;
+	GetWorld() -> LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 1250, "Projectile");
+
+	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
+
+	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+
+	//Add the newly spawned projectile to the 
+	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(TeleportProjectileClass, SpawnT, SpawnParams));
 }
 
 void ASBCharacter::PrimaryInteract()

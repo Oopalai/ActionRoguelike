@@ -62,6 +62,8 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SecondaryAttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* TeleportAction;
 #pragma endregion
 	
 protected:
@@ -70,6 +72,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Attack)
 	TSubclassOf<AActor> SecondaryProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	TSubclassOf<AActor> TeleportProjectileClass;
 	
 	UPROPERTY(EditAnywhere, Category = Attack)
 	UAnimMontage* AttackAnimation;
@@ -79,6 +84,7 @@ protected:
 
 	FTimerHandle TimerHandle_PrimaryAttack;
 	FTimerHandle TimerHandle_SecondaryAttack;
+	FTimerHandle TimerHandle_Teleport;
 	
 public:
 	// Sets default values for this character's properties
@@ -103,6 +109,10 @@ protected:
 	void SecondaryAttack();
 
 	void SecondaryAttack_TimeElapse();
+
+	void Teleport();
+
+	void Teleport_TimeElapsed();
 	
 	void PrimaryInteract();
 	
