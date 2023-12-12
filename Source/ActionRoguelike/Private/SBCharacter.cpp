@@ -71,7 +71,6 @@ void ASBCharacter::Jump()
 void ASBCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 	//Add the input mapping context.
 	if (const APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -80,6 +79,12 @@ void ASBCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	//Setup Delegates for inputs
+	PrimaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", ProjectileClass);
+	SecondaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", SecondaryProjectileClass);
+	TeleportDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", TeleportProjectileClass);
+	
 }
 
 // Called every frame
@@ -117,62 +122,26 @@ void ASBCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
+//HACK: These actions should be redone to use Animation Notifiers once we learn about them. 
 void ASBCharacter::PrimaryAttack()
 {
 	//Play the attack animation.
 	PlayAnimMontage(AttackAnimation);
-
-	//HACK: This should be redone to use Animation Notifiers once we learn about them. 
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASBCharacter::PrimaryAttack_TimeElapse, FAttackDelay);
+	GetWorldTimerManager().SetTimer(CastingTimerHandle, PrimaryAttackDelegate, FAttackDelay, false);
 }
-
-void ASBCharacter::PrimaryAttack_TimeElapse()
-{
-	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
-	FHitResult HitR;
-	GetWorld()->LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector()*1250, "Projectile");
-	FRotator ProjRotation =	UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
-	
-	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnT, SpawnParams));
-}
-
 void ASBCharacter::SecondaryAttack()
 {
 	PlayAnimMontage(AttackAnimation);
-
-	GetWorldTimerManager().SetTimer(TimerHandle_SecondaryAttack, this, &ASBCharacter::SecondaryAttack_TimeElapse, FAttackDelay);
-}
-
-void ASBCharacter::SecondaryAttack_TimeElapse()
-{
-	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
-	FHitResult HitR;
-	GetWorld() -> LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector()*1250, "Projectile");
-	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
-
-	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(SecondaryProjectileClass, SpawnT, SpawnParams));
+	GetWorldTimerManager().SetTimer(CastingTimerHandle, SecondaryAttackDelegate, FAttackDelay, false);
 }
 
 void ASBCharacter::Teleport()
 {
 	PlayAnimMontage(AttackAnimation);
-
-	GetWorldTimerManager().SetTimer(TimerHandle_Teleport, this, &ASBCharacter::Teleport_TimeElapsed, FAttackDelay);
+	GetWorldTimerManager().SetTimer(CastingTimerHandle, TeleportDelegate, FAttackDelay, false);
 }
 
-void ASBCharacter::Teleport_TimeElapsed()
+void ASBCharacter::SpawnProjectile_TimeElapsed(TSubclassOf<AActor> SpawnClass)
 {
 	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
 	FHitResult HitR;
@@ -186,9 +155,11 @@ void ASBCharacter::Teleport_TimeElapsed()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 
-	//Add the newly spawned projectile to the 
-	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(TeleportProjectileClass, SpawnT, SpawnParams));
+	//Spawn the projectile and add it to the ignored projectiles of the instigator.
+	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(SpawnClass, SpawnT, SpawnParams));
 }
+
+
 
 void ASBCharacter::PrimaryInteract()
 {
