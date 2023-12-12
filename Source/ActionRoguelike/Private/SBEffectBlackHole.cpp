@@ -18,7 +18,6 @@ ASBEffectBlackHole::ASBEffectBlackHole()
 	EffectComp->SetupAttachment(SphereComp);
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForceComp");
 	RadialForceComponent->SetupAttachment(SphereComp);
-	
 	RadialForceComponent->ForceStrength = -10000;
 	
 }

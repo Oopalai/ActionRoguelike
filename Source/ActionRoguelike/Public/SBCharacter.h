@@ -67,6 +67,11 @@ class ACTIONROGUELIKE_API ASBCharacter : public ACharacter
 #pragma endregion
 	
 protected:
+	
+	FTimerDelegate PrimaryAttackDelegate;
+	FTimerDelegate SecondaryAttackDelegate;
+	FTimerDelegate TeleportDelegate;
+	
 	UPROPERTY(EditAnywhere, Category = Attack)
 	TSubclassOf<AActor> ProjectileClass;
 
@@ -82,9 +87,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Attack)
 	float FAttackDelay;
 
-	FTimerHandle TimerHandle_PrimaryAttack;
-	FTimerHandle TimerHandle_SecondaryAttack;
-	FTimerHandle TimerHandle_Teleport;
+	//The timer for the casting animation.
+	FTimerHandle CastingTimerHandle;
 	
 public:
 	// Sets default values for this character's properties
@@ -99,20 +103,18 @@ protected:
 
 	/** Makes the character jump, called by the Jump Action.*/
 	virtual void Jump() override;
-	
+
+	//Casts
 	/** Performs the primary attack action of the character. */
 	void PrimaryAttack();
-
-	void PrimaryAttack_TimeElapse();
 
 	/** Performs the secondary attack action */
 	void SecondaryAttack();
 
-	void SecondaryAttack_TimeElapse();
-
 	void Teleport();
 
-	void Teleport_TimeElapsed();
+	UFUNCTION()
+	void SpawnProjectile_TimeElapsed(TSubclassOf<AActor> SpawnClass);
 	
 	void PrimaryInteract();
 	
