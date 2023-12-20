@@ -2,25 +2,8 @@
 
 
 #include "SBProjectile.h"
-
-#include "SBAttributeComponent.h"
-#include "SBProjectileMagic.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-
-void ASBProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor)
-	{
-		USBAttributeComponent* AttributeComp = Cast<USBAttributeComponent>(OtherActor->GetComponentByClass(USBAttributeComponent::StaticClass()));
-		if (AttributeComp)
-		{
-			AttributeComp->ApplyHealthChange(-20.0f);
-			Destroy();
-		}
-	}
-} 
 
 // Sets default values
 ASBProjectile::ASBProjectile()
@@ -29,7 +12,6 @@ ASBProjectile::ASBProjectile()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	SphereComp->SetCollisionProfileName("Projectile");
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASBProjectileMagic::OnActorOverlap);
 	RootComponent = SphereComp;
 	
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");

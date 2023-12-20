@@ -17,11 +17,13 @@ public:
 	USBAttributeComponent();
 
 protected:
-
+	
+	/**
+	 * T
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float Health;
 
-	//HealthMax, Stamina, Strength
 	
 public:	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")

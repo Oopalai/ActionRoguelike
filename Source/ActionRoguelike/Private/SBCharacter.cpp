@@ -81,9 +81,19 @@ void ASBCharacter::BeginPlay()
 	}
 
 	//Setup Delegates for inputs
-	PrimaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", ProjectileClass);
-	SecondaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", SecondaryProjectileClass);
-	TeleportDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", TeleportProjectileClass);
+	if (ensure(ProjectileClass))
+	{
+		PrimaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", ProjectileClass);
+	}
+
+	if (ensure(SecondaryProjectileClass))
+	{
+		SecondaryAttackDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", SecondaryProjectileClass);
+	}
+	if (ensure(TeleportProjectileClass))
+	{
+		TeleportDelegate.BindUFunction(this, "SpawnProjectile_TimeElapsed", TeleportProjectileClass);
+	}
 	
 }
 
@@ -91,6 +101,8 @@ void ASBCharacter::BeginPlay()
 void ASBCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	DrawDebugLine(GetWorld(), CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 1250, FColor::Blue, false, -1, 0, 2);
+
 
 }
 
@@ -145,8 +157,8 @@ void ASBCharacter::SpawnProjectile_TimeElapsed(TSubclassOf<AActor> SpawnClass)
 {
 	const FVector HandLoc = GetMesh()->GetSocketLocation("Muzzle_01");
 	FHitResult HitR;
+	//TODO: The bug here is that the overlap versus hit is not quite right. 
 	GetWorld() -> LineTraceSingleByProfile(HitR, CameraComp->GetComponentLocation(), CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 1250, "Projectile");
-
 	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLoc, HitR.IsValidBlockingHit() ? HitR.ImpactPoint : HitR.TraceEnd);
 
 	const FTransform SpawnT = FTransform(ProjRotation, HandLoc);
@@ -158,8 +170,6 @@ void ASBCharacter::SpawnProjectile_TimeElapsed(TSubclassOf<AActor> SpawnClass)
 	//Spawn the projectile and add it to the ignored projectiles of the instigator.
 	this->MoveIgnoreActorAdd(GetWorld()->SpawnActor<AActor>(SpawnClass, SpawnT, SpawnParams));
 }
-
-
 
 void ASBCharacter::PrimaryInteract()
 {
